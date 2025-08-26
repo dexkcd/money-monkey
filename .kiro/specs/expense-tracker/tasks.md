@@ -21,19 +21,19 @@
   - _Requirements: 8.1, 8.4_
 
 - [x] 3. Implement user authentication system
-
-
-
-
-
-
   - Create user registration and login endpoints with JWT token generation
   - Implement password hashing using bcrypt
   - Add authentication middleware for protected routes
   - Create user model validation with Pydantic schemas
   - _Requirements: 8.4_
 
-- [ ] 4. Create expense category management
+- [x] 4. Create expense category management
+
+
+
+
+
+
   - Implement CRUD endpoints for expense categories
   - Seed default categories (Restaurants, Housing, Grocery, Leisure) in database
   - Add category validation and user-specific category support
@@ -42,7 +42,7 @@
 
 - [ ] 5. Implement file upload and receipt processing
   - Create file upload endpoint with support for images and PDFs
-  - Integrate OpenAI GPT-4 Vision API for receipt text extraction
+  - Integrate OpenAI GPT-5 Vision API for receipt text extraction
   - Implement receipt data parsing and validation
   - Add file storage system with proper file naming and organization
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
