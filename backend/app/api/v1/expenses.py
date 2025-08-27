@@ -1,6 +1,7 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
 from sqlalchemy.orm import Session
+from datetime import date
 from ...core.deps import get_db, get_current_user
 from ...models.user import User
 from ...schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseResponse, FileUploadResponse
@@ -12,13 +13,34 @@ expense_service = ExpenseService()
 
 @router.get("/", response_model=List[ExpenseResponse])
 def get_expenses(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    category_id: Optional[int] = Query(None, description="Filter by category ID"),
+    start_date: Optional[date] = Query(None, description="Filter expenses from this date"),
+    end_date: Optional[date] = Query(None, description="Filter expenses until this date"),
+    min_amount: Optional[float] = Query(None, ge=0, description="Minimum expense amount"),
+    max_amount: Optional[float] = Query(None, ge=0, description="Maximum expense amount"),
+    search: Optional[str] = Query(None, max_length=100, description="Search in expense descriptions"),
+    sort_by: Optional[str] = Query("expense_date", regex="^(expense_date|amount|created_at|description)$", description="Field to sort by"),
+    sort_order: Optional[str] = Query("desc", regex="^(asc|desc)$", description="Sort order"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get all expenses for the current user"""
-    expenses = expense_service.get_expenses(db, current_user.id, skip, limit)
+    """Get expenses for the current user with filtering and sorting options"""
+    expenses = expense_service.get_expenses(
+        db=db,
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
+        category_id=category_id,
+        start_date=start_date,
+        end_date=end_date,
+        min_amount=min_amount,
+        max_amount=max_amount,
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order
+    )
     return expenses
 
 
@@ -38,22 +60,24 @@ def get_expense(
 @router.post("/", response_model=ExpenseResponse)
 def create_expense(
     expense: ExpenseCreate,
+    auto_categorize: bool = Query(False, description="Use AI to automatically categorize the expense"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create a new expense"""
-    return expense_service.create_expense(db, expense, current_user.id)
+    """Create a new expense with optional AI categorization"""
+    return expense_service.create_expense(db, expense, current_user.id, auto_categorize)
 
 
 @router.put("/{expense_id}", response_model=ExpenseResponse)
 def update_expense(
     expense_id: int,
     expense_update: ExpenseUpdate,
+    auto_categorize: bool = Query(False, description="Use AI to automatically categorize the expense"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update an existing expense"""
-    expense = expense_service.update_expense(db, expense_id, expense_update, current_user.id)
+    """Update an existing expense with optional AI categorization"""
+    expense = expense_service.update_expense(db, expense_id, expense_update, current_user.id, auto_categorize)
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
     return expense
@@ -116,3 +140,31 @@ def create_expense_from_receipt(
     return expense_service.create_expense_from_receipt(
         db, current_user.id, file_url, processing_result
     )
+
+
+@router.post("/categorize")
+def suggest_category(
+    description: str = Form(...),
+    amount: Optional[float] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get AI-powered category suggestion for an expense description
+    """
+    suggestion = expense_service.suggest_category(description, amount)
+    return {"suggested_category": suggestion}
+
+
+@router.get("/stats")
+def get_expense_stats(
+    start_date: Optional[date] = Query(None, description="Start date for statistics"),
+    end_date: Optional[date] = Query(None, description="End date for statistics"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get expense statistics for the current user
+    """
+    stats = expense_service.get_expense_stats(db, current_user.id, start_date, end_date)
+    return stats

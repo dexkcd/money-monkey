@@ -52,7 +52,10 @@
   - Add file storage system with proper file naming and organization
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [-] 6. Build expense management system
+- [x] 6. Build expense management system
+
+
+
 
 
 

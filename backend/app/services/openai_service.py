@@ -1,5 +1,5 @@
 import base64
-import openai
+from openai import OpenAI
 from typing import Optional, Dict, Any
 from pathlib import Path
 from decimal import Decimal
@@ -16,7 +16,12 @@ class OpenAIService:
         if not settings.openai_api_key:
             raise ValueError("OpenAI API key not configured")
         
-        self.client = openai.OpenAI(api_key=settings.openai_api_key)
+        try:
+            self.client = OpenAI(api_key=settings.openai_api_key)
+        except Exception as e:
+            # If there's an issue with client initialization, log it but don't fail
+            print(f"Warning: OpenAI client initialization failed: {e}")
+            self.client = None
         
         # Default categories for expense classification
         self.default_categories = [
@@ -60,6 +65,13 @@ class OpenAIService:
     
     def _process_image_receipt(self, image_path: str) -> ReceiptProcessingResult:
         """Process image receipt using OpenAI Vision API"""
+        if not self.client:
+            return ReceiptProcessingResult(
+                raw_text="OpenAI client not available",
+                suggested_category="Other",
+                confidence_score=0.0
+            )
+            
         base64_image = self.encode_image(image_path)
         
         prompt = f"""
@@ -85,7 +97,7 @@ class OpenAIService:
         
         try:
             response = self.client.chat.completions.create(
-                model="gpt-4-vision-preview",
+                model="gpt-4o-mini",  # Updated to use the current vision model
                 messages=[
                     {
                         "role": "user",
@@ -177,18 +189,34 @@ class OpenAIService:
         """
         Categorize an expense based on description and amount
         """
+        if not self.client:
+            return "Other"
+            
         try:
+            # Enhanced prompt with examples for better categorization
             prompt = f"""
             Categorize this expense into one of these categories: {', '.join(self.default_categories)}
             
             Expense description: {description}
             Amount: ${amount if amount else 'unknown'}
             
-            Return only the category name that best matches this expense.
+            Category guidelines:
+            - Restaurants: dining out, takeout, food delivery, cafes, bars
+            - Housing: rent, mortgage, utilities, home repairs, furniture
+            - Grocery: supermarket, food shopping, household supplies
+            - Leisure: entertainment, hobbies, sports, movies, games
+            - Transportation: gas, public transit, car maintenance, parking, rideshare
+            - Healthcare: medical bills, pharmacy, insurance, dental, vision
+            - Shopping: clothing, electronics, personal items, gifts
+            - Utilities: electricity, water, internet, phone, streaming services
+            - Entertainment: movies, concerts, subscriptions, books
+            - Other: anything that doesn't fit the above categories
+            
+            Return only the category name that best matches this expense. Be precise and choose the most specific category.
             """
             
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",  # Updated to use current model
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=50,
                 temperature=0.1
@@ -196,11 +224,21 @@ class OpenAIService:
             
             category = response.choices[0].message.content.strip()
             
-            # Ensure the category is in our allowed list
+            # Clean up the response and ensure it's in our allowed list
+            category = category.replace('"', '').replace("'", '').strip()
+            
+            # Try exact match first
             if category in self.default_categories:
                 return category
-            else:
-                return "Other"
+            
+            # Try case-insensitive match
+            for allowed_category in self.default_categories:
+                if category.lower() == allowed_category.lower():
+                    return allowed_category
+            
+            # If no match found, return "Other"
+            return "Other"
                 
-        except Exception:
+        except Exception as e:
+            print(f"OpenAI categorization error: {e}")
             return "Other"
