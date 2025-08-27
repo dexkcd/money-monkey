@@ -40,14 +40,22 @@
   - Create category model with color and default flag support
   - _Requirements: 2.2, 2.3_
 
-- [ ] 5. Implement file upload and receipt processing
+- [x] 5. Implement file upload and receipt processing
+
+
+
+
+
   - Create file upload endpoint with support for images and PDFs
   - Integrate OpenAI GPT-5 Vision API for receipt text extraction
   - Implement receipt data parsing and validation
   - Add file storage system with proper file naming and organization
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 6. Build expense management system
+- [-] 6. Build expense management system
+
+
+
   - Create expense CRUD endpoints with proper validation
   - Implement OpenAI integration for automatic expense categorization
   - Add expense creation from receipt processing results
