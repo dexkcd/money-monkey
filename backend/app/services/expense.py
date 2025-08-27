@@ -128,6 +128,10 @@ class ExpenseService:
         db.add(db_expense)
         db.commit()
         db.refresh(db_expense)
+        
+        # Trigger budget monitoring after expense creation
+        self._check_budget_alerts_after_expense(db, user_id)
+        
         return db_expense
     
     def suggest_category(self, description: str, amount: Optional[float] = None) -> str:
@@ -342,4 +346,20 @@ class ExpenseService:
         db.add(db_expense)
         db.commit()
         db.refresh(db_expense)
+        
+        # Trigger budget monitoring after expense creation
+        self._check_budget_alerts_after_expense(db, user_id)
+        
         return db_expense
+
+    def _check_budget_alerts_after_expense(self, db: Session, user_id: int):
+        """Check budget alerts after creating an expense and send notifications if needed."""
+        try:
+            # Import here to avoid circular imports
+            from .budget_monitor import BudgetMonitorService
+            
+            budget_monitor = BudgetMonitorService(db)
+            budget_monitor.check_user_budget_alerts(user_id)
+        except Exception as e:
+            # Log error but don't fail expense creation
+            print(f"Budget monitoring failed after expense creation: {e}")

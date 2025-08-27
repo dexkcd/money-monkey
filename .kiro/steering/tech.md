@@ -50,6 +50,11 @@ npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
+### Frontend Testing & Iteration
+- **Use Playwright for frontend testing**: When implementing frontend features, use Playwright to navigate, interact with, and verify the implementation
+- **Iterate with browser automation**: Test user flows, form submissions, and UI interactions using Playwright tools
+- **Verify implementation correctness**: Use Playwright to ensure frontend components work as expected before considering tasks complete
+
 ### Backend Commands
 ```bash
 # Database migrations (run inside backend container)

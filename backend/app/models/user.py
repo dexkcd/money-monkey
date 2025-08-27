@@ -15,3 +15,5 @@ class User(Base):
     expenses = relationship("Expense", back_populates="user", cascade="all, delete-orphan")
     budgets = relationship("Budget", back_populates="user", cascade="all, delete-orphan")
     categories = relationship("Category", back_populates="user", cascade="all, delete-orphan")
+    notification_subscriptions = relationship("NotificationSubscription", back_populates="user", cascade="all, delete-orphan")
+    notification_preferences = relationship("NotificationPreferences", back_populates="user", cascade="all, delete-orphan", uselist=False)

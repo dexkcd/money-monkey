@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # Push Notifications
     vapid_public_key: str = ""
     vapid_private_key: str = ""
-    vapid_subject: str = "mailto:your-email@example.com"
+    vapid_claim_email: str = "admin@expense-tracker.com"
 
     class Config:
         env_file = ".env"
