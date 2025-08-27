@@ -65,6 +65,7 @@ def create_expense(
     current_user: User = Depends(get_current_user)
 ):
     """Create a new expense with optional AI categorization"""
+    print(f"DEBUG: create_expense endpoint called with data: {expense}")
     return expense_service.create_expense(db, expense, current_user.id, auto_categorize)
 
 
@@ -125,6 +126,8 @@ def create_expense_from_receipt(
     """
     Create an expense from processed receipt data
     """
+    print(f"DEBUG: create_expense_from_receipt endpoint called with file_url: {file_url}")
+    print(f"DEBUG: suggested_category: {suggested_category}, confidence_score: {confidence_score}")
     from datetime import datetime
     from decimal import Decimal
     

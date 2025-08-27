@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { CategoriesProvider } from './contexts/CategoriesContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/Auth';
 import { Dashboard, Expenses, Budgets, Analytics, Login, Register } from './pages';
@@ -8,7 +9,8 @@ import { Dashboard, Expenses, Budgets, Analytics, Login, Register } from './page
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <CategoriesProvider>
+        <Router>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -48,6 +50,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </CategoriesProvider>
     </AuthProvider>
   );
 }
