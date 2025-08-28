@@ -157,14 +157,21 @@
   - Create budget progress indicators and visual feedback
   - _Requirements: 3.1, 3.2, 7.1, 7.2, 7.3_
 
-- [ ] 14. Implement push notification system
+- [x] 14. Implement push notification system
+
+
+
+
+
   - Set up service worker for push notification handling
   - Create notification subscription and permission management
   - Implement notification display and interaction handling
   - Add notification preferences and settings interface
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 15. Build analytics dashboard
+- [x] 15. Build analytics dashboard
+
+
   - Create chart components using a charting library (Chart.js or Recharts)
   - Implement spending visualization with monthly and category breakdowns
   - Add interactive chart features with hover details and drill-down

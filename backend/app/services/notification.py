@@ -1,5 +1,6 @@
 import json
 import logging
+import base64
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
@@ -22,6 +23,20 @@ logger = logging.getLogger(__name__)
 class NotificationService:
     def __init__(self, db: Session):
         self.db = db
+    
+    def _get_vapid_private_key(self) -> str:
+        """Get the VAPID private key in PEM format for pywebpush."""
+        vapid_key = settings.vapid_private_key
+        if not vapid_key:
+            raise ValueError("VAPID private key not configured")
+        
+        try:
+            # Decode the base64 encoded key to get the PEM format
+            decoded_key = base64.b64decode(vapid_key).decode('utf-8')
+            return decoded_key
+        except Exception as e:
+            logger.error(f"Failed to decode VAPID private key: {e}")
+            raise ValueError(f"Invalid VAPID private key format: {e}")
 
     def create_subscription(self, subscription_data: NotificationSubscriptionCreate, user_id: int) -> NotificationSubscription:
         """Create or update a push notification subscription for a user."""
@@ -87,16 +102,27 @@ class NotificationService:
         ).first()
 
         if not preferences:
-            # Create default preferences
-            preferences = NotificationPreferences(
-                user_id=user_id,
-                budget_warnings_enabled=True,
-                budget_exceeded_enabled=True,
-                warning_threshold=80
-            )
-            self.db.add(preferences)
-            self.db.commit()
-            self.db.refresh(preferences)
+            try:
+                # Create default preferences
+                preferences = NotificationPreferences(
+                    user_id=user_id,
+                    budget_warnings_enabled=True,
+                    budget_exceeded_enabled=True,
+                    warning_threshold=80
+                )
+                self.db.add(preferences)
+                self.db.commit()
+                self.db.refresh(preferences)
+            except Exception as e:
+                # Handle race condition - another request might have created the preferences
+                self.db.rollback()
+                preferences = self.db.query(NotificationPreferences).filter(
+                    NotificationPreferences.user_id == user_id
+                ).first()
+                
+                if not preferences:
+                    # If still not found, re-raise the original exception
+                    raise e
 
         return preferences
 
@@ -126,6 +152,9 @@ class NotificationService:
                 "tag": payload.tag or "expense-tracker"
             }
 
+            # Get the decoded VAPID private key
+            vapid_private_key = self._get_vapid_private_key()
+            
             # Send the push notification
             webpush(
                 subscription_info={
@@ -136,9 +165,9 @@ class NotificationService:
                     }
                 },
                 data=json.dumps(notification_payload),
-                vapid_private_key=getattr(settings, 'VAPID_PRIVATE_KEY', None),
+                vapid_private_key=vapid_private_key,
                 vapid_claims={
-                    "sub": f"mailto:{getattr(settings, 'VAPID_CLAIM_EMAIL', 'admin@expense-tracker.com')}"
+                    "sub": f"mailto:{settings.vapid_claim_email}"
                 }
             )
 

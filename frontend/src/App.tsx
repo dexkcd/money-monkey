@@ -2,15 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/Auth';
-import { Dashboard, Expenses, Budgets, Analytics, Login, Register } from './pages';
+import { Dashboard, Expenses, Budgets, Analytics, Notifications, Login, Register } from './pages';
 
 function App() {
   return (
     <AuthProvider>
       <CategoriesProvider>
-        <Router>
+        <NotificationProvider>
+          <Router>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -45,11 +47,19 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <Layout>
+                <Notifications />
+              </Layout>
+            </ProtectedRoute>
+          } />
           
           {/* Catch all route - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+        </NotificationProvider>
       </CategoriesProvider>
     </AuthProvider>
   );

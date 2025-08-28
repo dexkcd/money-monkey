@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import NotificationPermissionPrompt from '../components/Notifications/NotificationPermissionPrompt';
 
 const Dashboard: React.FC = () => {
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(true);
+
   return (
     <div>
       <div className="mb-8">
@@ -9,6 +12,11 @@ const Dashboard: React.FC = () => {
           Welcome to your expense tracking dashboard
         </p>
       </div>
+
+      {/* Notification Permission Prompt */}
+      {showNotificationPrompt && (
+        <NotificationPermissionPrompt onDismiss={() => setShowNotificationPrompt(false)} />
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* Quick Stats Cards */}
