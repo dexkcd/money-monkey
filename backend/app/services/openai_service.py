@@ -32,10 +32,34 @@ class OpenAIService:
     def encode_image(self, image_path: str) -> str:
         """Encode image to base64 for OpenAI Vision API"""
         try:
-            with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode('utf-8')
+            from PIL import Image
+            import io
+            
+            # Open and potentially resize the image to avoid size limits
+            with Image.open(image_path) as img:
+                # Convert to RGB if necessary (handles RGBA, etc.)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                
+                # Resize if too large (OpenAI has size limits)
+                max_size = (2048, 2048)
+                if img.size[0] > max_size[0] or img.size[1] > max_size[1]:
+                    img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                
+                # Save to bytes
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format='JPEG', quality=85)
+                img_byte_arr = img_byte_arr.getvalue()
+                
+                return base64.b64encode(img_byte_arr).decode('utf-8')
+                
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to encode image: {str(e)}")
+            # Fallback to original method if PIL processing fails
+            try:
+                with open(image_path, "rb") as image_file:
+                    return base64.b64encode(image_file.read()).decode('utf-8')
+            except Exception as fallback_error:
+                raise HTTPException(status_code=500, detail=f"Failed to encode image: {str(fallback_error)}")
     
     def extract_receipt_data(self, file_path: str, content_type: str) -> ReceiptProcessingResult:
         """
@@ -96,32 +120,57 @@ class OpenAIService:
         """
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",  # Updated to use the current vision model
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
+            # Try with models that support vision/multimodal input
+            models_to_try = [
+                {"name": "gpt-4o", "max_tokens_param": "max_tokens"},
+                {"name": "gpt-4o-mini", "max_tokens_param": "max_tokens"},
+                {"name": "gpt-5", "max_tokens_param": "max_completion_tokens"}
+            ]
+            
+            for model_config in models_to_try:
+                try:
+                    # Prepare the request parameters
+                    request_params = {
+                        "model": model_config["name"],
+                        "messages": [
                             {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}",
-                                    "detail": "high"
-                                }
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": prompt},
+                                    {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"data:image/jpeg;base64,{base64_image}",
+                                            "detail": "high"
+                                        }
+                                    }
+                                ]
                             }
-                        ]
+                        ],
+                        model_config["max_tokens_param"]: 1000,
+                        "temperature": 0.1
                     }
-                ],
-                max_tokens=1000,
-                temperature=0.1
-            )
+                    
+                    response = self.client.chat.completions.create(**request_params)
+                    # If successful, break out of the loop
+                    break
+                except Exception as model_error:
+                    print(f"Model {model_config['name']} failed: {model_error}")
+                    if model_config == models_to_try[-1]:  # Last model in the list
+                        raise model_error
+                    continue
             
             # Parse the response
             content = response.choices[0].message.content
             return self._parse_openai_response(content)
             
         except Exception as e:
+            # Log the full error for debugging
+            print(f"OpenAI API Error Details: {type(e).__name__}: {str(e)}")
+            if hasattr(e, 'response'):
+                print(f"Response status: {e.response.status_code if hasattr(e.response, 'status_code') else 'unknown'}")
+                print(f"Response text: {e.response.text if hasattr(e.response, 'text') else 'unknown'}")
+            
             # Fallback if OpenAI API fails
             return ReceiptProcessingResult(
                 raw_text=f"OpenAI processing failed: {str(e)}",
@@ -215,12 +264,30 @@ class OpenAIService:
             Return only the category name that best matches this expense. Be precise and choose the most specific category.
             """
             
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",  # Updated to use current model
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=50,
-                temperature=0.1
-            )
+            # Try with available text models
+            models_to_try = [
+                {"name": "gpt-4o", "max_tokens_param": "max_tokens"},
+                {"name": "gpt-4o-mini", "max_tokens_param": "max_tokens"},
+                {"name": "gpt-5", "max_tokens_param": "max_completion_tokens"},
+                {"name": "gpt-4-turbo", "max_tokens_param": "max_tokens"}
+            ]
+            
+            for model_config in models_to_try:
+                try:
+                    request_params = {
+                        "model": model_config["name"],
+                        "messages": [{"role": "user", "content": prompt}],
+                        model_config["max_tokens_param"]: 50,
+                        "temperature": 0.1
+                    }
+                    
+                    response = self.client.chat.completions.create(**request_params)
+                    break
+                except Exception as model_error:
+                    print(f"Model {model_config['name']} failed: {model_error}")
+                    if model_config == models_to_try[-1]:
+                        raise model_error
+                    continue
             
             category = response.choices[0].message.content.strip()
             
