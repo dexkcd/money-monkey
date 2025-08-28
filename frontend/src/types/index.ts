@@ -36,7 +36,10 @@ export interface Budget {
   period_type: 'WEEKLY' | 'MONTHLY';
   start_date: string;
   end_date: string;
-  created_at: string;
+  current_spending?: number;
+  remaining_amount?: number;
+  percentage_used?: number;
+  created_at?: string;
   category?: Category;
 }
 

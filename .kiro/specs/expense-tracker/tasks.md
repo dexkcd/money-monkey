@@ -145,7 +145,12 @@
   - Add expense editing interface with category selection
   - _Requirements: 1.1, 1.2, 1.3, 2.3_
 
-- [ ] 13. Develop budget management UI
+- [x] 13. Develop budget management UI
+
+
+
+
+
   - Create budget setting interface for monthly and weekly budgets
   - Implement budget display with current spending vs. budget limits
   - Add custom date period configuration for spending months
