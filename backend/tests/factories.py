@@ -11,7 +11,7 @@ from app.models.category import Category
 from app.models.expense import Expense
 from app.models.budget import Budget
 from app.models.notification import NotificationSubscription
-from app.services.auth import get_password_hash
+from app.core.security import get_password_hash
 
 
 class UserFactory(SQLAlchemyModelFactory):
@@ -48,8 +48,9 @@ class ExpenseFactory(SQLAlchemyModelFactory):
     created_at = factory.LazyFunction(datetime.utcnow)
     updated_at = factory.LazyFunction(datetime.utcnow)
 
-    user_id = factory.SubFactory(UserFactory)
-    category_id = factory.SubFactory(CategoryFactory)
+    # Don't use SubFactory for foreign keys in tests, set them manually
+    user_id = 1
+    category_id = 1
 
 
 class BudgetFactory(SQLAlchemyModelFactory):
@@ -63,8 +64,9 @@ class BudgetFactory(SQLAlchemyModelFactory):
     end_date = factory.LazyFunction(lambda: date.today().replace(day=28))
     created_at = factory.LazyFunction(datetime.utcnow)
 
-    user_id = factory.SubFactory(UserFactory)
-    category_id = factory.SubFactory(CategoryFactory)
+    # Don't use SubFactory for foreign keys in tests, set them manually
+    user_id = 1
+    category_id = 1
 
 
 class NotificationSubscriptionFactory(SQLAlchemyModelFactory):
@@ -78,4 +80,5 @@ class NotificationSubscriptionFactory(SQLAlchemyModelFactory):
     is_active = True
     created_at = factory.LazyFunction(datetime.utcnow)
 
-    user_id = factory.SubFactory(UserFactory)
+    # Don't use SubFactory for foreign keys in tests, set them manually
+    user_id = 1

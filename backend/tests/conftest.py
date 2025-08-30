@@ -15,7 +15,7 @@ from app.core.database import get_db, Base
 from app.core.deps import get_current_user
 from app.models.user import User
 from app.models.category import Category
-from app.services.auth import create_access_token
+from app.core.security import create_access_token
 
 # Test database URL
 TEST_DATABASE_URL = "sqlite:///./test.db"
@@ -73,7 +73,7 @@ def client(db_session):
 @pytest.fixture
 def test_user(db_session):
     """Create a test user."""
-    from app.services.auth import get_password_hash
+    from app.core.security import get_password_hash
     
     user = User(
         email="test@example.com",

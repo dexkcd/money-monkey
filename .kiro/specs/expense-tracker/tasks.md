@@ -191,7 +191,9 @@
   - Add AI-powered recommendation display that fetches from analytics API
   - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 6.3_
 
-- [-] 16. Create automated tests for backend
+- [x] 16. Create automated tests for backend
+
+
 
 
 
@@ -202,7 +204,9 @@
   - Implement test data factories and database seeding for consistent testing
   - _Requirements: All requirements validation_
 
-- [ ] 17. Create automated tests for frontend
+- [-] 17. Create automated tests for frontend
+
+
   - Set up React Testing Library and Jest for component testing
   - Write component tests for all major React components (ExpenseForm, BudgetCard, etc.)
   - Create integration tests for user workflows using Playwright
