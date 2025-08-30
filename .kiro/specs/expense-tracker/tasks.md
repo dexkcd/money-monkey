@@ -172,43 +172,48 @@
 - [x] 15. Build analytics dashboard
 
 
-  - Create chart components using a charting library (Chart.js or Recharts)
-  - Implement spending visualization with monthly and category breakdowns
-  - Add interactive chart features with hover details and drill-down
-  - Create AI-powered recommendation display interface
-  - _Requirements: 5.3, 6.1, 6.2, 6.3_
 
-- [ ] 16. Integrate frontend with backend APIs
-  - Implement API client with proper error handling and loading states
-  - Connect all frontend components to corresponding backend endpoints
-  - Add proper error handling and user feedback for API failures
-  - Implement data synchronization and real-time updates
-  - _Requirements: 8.4_
 
-- [ ] 17. Add comprehensive error handling and validation
-  - Implement client-side form validation with user-friendly error messages
-  - Add API error handling with graceful degradation for OpenAI service failures
-  - Create loading states and progress indicators for long-running operations
-  - Add offline support and error recovery mechanisms
-  - _Requirements: 1.4, 2.4, 5.4_
 
-- [ ] 18. Create automated tests for backend
-  - Write unit tests for all service functions and business logic
+
+
+
+
+
+
+
+
+
+  - Install chart library (Chart.js or Recharts) for data visualization
+  - Create analytics API service to fetch spending data from backend
+  - Implement chart components for spending by category and monthly trends
+  - Connect Analytics page to display real spending data with interactive charts
+  - Add AI-powered recommendation display that fetches from analytics API
+  - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 6.3_
+
+- [-] 16. Create automated tests for backend
+
+
+
+  - Set up pytest testing framework with test database configuration
+  - Write unit tests for all service functions (expense, budget, analytics, notification)
   - Create integration tests for API endpoints with database interactions
-  - Add tests for OpenAI API integration with mocking
+  - Add tests for OpenAI API integration with proper mocking
   - Implement test data factories and database seeding for consistent testing
   - _Requirements: All requirements validation_
 
-- [ ] 19. Create automated tests for frontend
-  - Write component tests for all React components using React Testing Library
-  - Create integration tests for user workflows and API interactions
+- [ ] 17. Create automated tests for frontend
+  - Set up React Testing Library and Jest for component testing
+  - Write component tests for all major React components (ExpenseForm, BudgetCard, etc.)
+  - Create integration tests for user workflows using Playwright
   - Add accessibility tests to ensure WCAG compliance
   - Implement visual regression tests for UI consistency
   - _Requirements: All requirements validation_
 
-- [ ] 20. Set up production deployment configuration
+- [ ] 18. Set up production deployment configuration
   - Create production Docker Compose configuration with optimized builds
-  - Configure environment variables and secrets management
-  - Set up database migrations and seeding for production
+  - Configure environment variables and secrets management for production
+  - Set up database migrations and seeding for production environment
   - Add health checks and monitoring configuration
+  - Create deployment scripts and documentation
   - _Requirements: 8.1, 8.2, 8.3, 8.4_

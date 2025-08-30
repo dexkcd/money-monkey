@@ -152,10 +152,7 @@ class NotificationService:
                 "tag": payload.tag or "expense-tracker"
             }
 
-            # Get the decoded VAPID private key
-            vapid_private_key = self._get_vapid_private_key()
-            
-            # Send the push notification
+            # Send the push notification using VAPID keys as dict
             webpush(
                 subscription_info={
                     "endpoint": subscription.endpoint,
@@ -165,7 +162,10 @@ class NotificationService:
                     }
                 },
                 data=json.dumps(notification_payload),
-                vapid_private_key=vapid_private_key,
+                vapid_private_key={
+                    "private_key": self._get_vapid_private_key(),
+                    "public_key": settings.vapid_public_key
+                },
                 vapid_claims={
                     "sub": f"mailto:{settings.vapid_claim_email}"
                 }
