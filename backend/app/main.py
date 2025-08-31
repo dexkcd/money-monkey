@@ -85,11 +85,50 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {
+    """Comprehensive health check for production monitoring."""
+    from .core.database import get_db
+    from .models import Category
+    import psutil
+    import datetime
+    
+    health_status = {
         "status": "healthy",
-        "database": "connected",
-        "environment": settings.environment
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "environment": settings.environment,
+        "version": "1.0.0"
     }
+    
+    # Database health check
+    try:
+        db = next(get_db())
+        db.query(Category).count()
+        health_status["database"] = "connected"
+        db.close()
+    except Exception as e:
+        health_status["database"] = f"error: {str(e)}"
+        health_status["status"] = "unhealthy"
+    
+    # System resource check
+    try:
+        health_status["system"] = {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent
+        }
+    except Exception:
+        # psutil might not be available in all environments
+        health_status["system"] = "unavailable"
+    
+    # OpenAI API check (basic)
+    health_status["openai_configured"] = bool(settings.openai_api_key)
+    
+    # Upload directory check
+    health_status["upload_dir"] = {
+        "exists": os.path.exists(settings.upload_dir),
+        "writable": os.access(settings.upload_dir, os.W_OK) if os.path.exists(settings.upload_dir) else False
+    }
+    
+    return health_status
 
 
 @app.get("/db-test")

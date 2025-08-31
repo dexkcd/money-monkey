@@ -63,6 +63,42 @@ The development environment includes:
 
 See `.env.example` files for all available configuration options.
 
+## Production Deployment
+
+For production deployment, use the dedicated production configuration:
+
+### Quick Production Setup
+
+1. **Generate production secrets:**
+   ```bash
+   ./scripts/generate-secrets.sh    # Linux/macOS
+   scripts\generate-secrets.bat     # Windows
+   ```
+
+2. **Configure environment:**
+   Edit the generated `.env.prod` file with your OpenAI API key and domain settings.
+
+3. **Deploy:**
+   ```bash
+   ./scripts/deploy-prod.sh         # Linux/macOS
+   scripts\deploy-prod.bat          # Windows
+   ```
+
+4. **Verify deployment:**
+   - Frontend: http://localhost
+   - Health Check: http://localhost/health
+
+### Production Features
+
+- **Optimized Docker builds** with multi-stage builds
+- **Nginx reverse proxy** with SSL support and rate limiting
+- **Health checks** and monitoring endpoints
+- **Database migrations** and default data seeding
+- **Security hardening** with non-root containers
+- **Comprehensive logging** and error handling
+
+For detailed production deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Project Structure
 
 ```
