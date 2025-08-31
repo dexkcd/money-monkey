@@ -13,7 +13,15 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:accessibility": "vitest --run tests/accessibility",
+    "test:visual": "playwright test tests/visual",
+    "test:components": "vitest --run src/components",
+    "test:integration": "playwright test tests/e2e",
+    "test:all": "node scripts/test-runner.js --all",
+    "test:all:parallel": "node scripts/test-runner.js --all --parallel",
+    "test:unit": "node scripts/test-runner.js unit",
+    "test:runner": "node scripts/test-runner.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

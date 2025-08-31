@@ -50,10 +50,61 @@ npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
-### Frontend Testing & Iteration
-- **Use Playwright for frontend testing**: When implementing frontend features, use Playwright to navigate, interact with, and verify the implementation
-- **Iterate with browser automation**: Test user flows, form submissions, and UI interactions using Playwright tools
-- **Verify implementation correctness**: Use Playwright to ensure frontend components work as expected before considering tasks complete
+### Frontend Testing & Quality Assurance
+
+#### Testing Stack
+- **Unit/Component Tests**: Vitest + React Testing Library + Jest DOM
+- **Integration Tests**: Playwright for cross-browser E2E testing
+- **Accessibility Tests**: vitest-axe for WCAG compliance
+- **Visual Regression Tests**: Playwright screenshot comparison
+- **Test Orchestration**: Custom Node.js test runner for coordinated execution
+
+#### Test Execution Commands
+```bash
+# Individual test types
+npm run test                    # Unit/component tests
+npm run test:watch             # Watch mode for development
+npm run test:coverage          # Coverage report (80% minimum)
+npm run test:e2e               # Integration tests
+npm run test:accessibility     # Accessibility compliance
+npm run test:visual            # Visual regression tests
+
+# Orchestrated testing (recommended)
+npm run test:all               # All tests sequentially
+npm run test:all:parallel      # All tests in parallel (faster)
+npm run test:runner unit       # Specific test type via runner
+node scripts/test-runner.js --all --verbose  # Detailed output
+```
+
+#### Testing Process & Best Practices
+- **Test-Driven Development**: Write tests before implementing features when possible
+- **Component Testing**: Test user behavior, not implementation details
+- **Integration Testing**: Verify complete user workflows and API interactions
+- **Accessibility First**: Include WCAG compliance checks for all interactive components
+- **Visual Consistency**: Use screenshot comparison to catch unintended UI changes
+- **Save Test Results**: All test outputs are saved to `test-results/` directory for debugging
+
+#### Test Coverage Requirements
+- **Minimum Coverage**: 80% for lines, functions, branches, and statements
+- **Component Coverage**: All major components must have comprehensive tests
+- **Workflow Coverage**: All user journeys must be tested end-to-end
+- **Accessibility Coverage**: All interactive elements must pass axe tests
+- **Cross-browser Coverage**: Tests run on Chrome, Firefox, and Safari
+
+#### Implementation Verification Process
+1. **Write Component Tests**: Test rendering, interactions, and edge cases
+2. **Add Integration Tests**: Verify complete user workflows with Playwright
+3. **Include Accessibility Tests**: Ensure WCAG compliance with axe testing
+4. **Add Visual Tests**: Capture screenshots for UI consistency
+5. **Run Full Test Suite**: Use `npm run test:all:parallel` for comprehensive validation
+6. **Review Test Results**: Check `test-results/` directory for detailed logs and coverage reports
+
+#### Debugging & Troubleshooting
+- **Component Tests**: Use `npm run test:watch` for development iteration
+- **Integration Tests**: Use `npm run test:e2e:ui` for visual debugging
+- **Test Failures**: Check saved logs in `test-results/` directory
+- **Flaky Tests**: Use proper `waitFor` patterns and stable selectors
+- **Performance**: Run tests in parallel for faster feedback cycles
 
 ### Backend Commands
 ```bash
